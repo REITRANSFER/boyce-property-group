@@ -337,6 +337,8 @@
         var addressValidated={propertyAddress:false,stickyAddress:false};
         let currentStep=1;const totalSteps=8;const answers={};
         var formData = {};
+        // Capture UTM parameters, fbclid, and IP address
+        var utmParams={};(function(){var p=new URLSearchParams(window.location.search);['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid'].forEach(function(k){var v=p.get(k);if(v)utmParams[k]=v;});utmParams.landing_page=window.location.pathname;fetch('https://api.ipify.org?format=json').then(function(r){return r.json();}).then(function(d){utmParams.ip_address=d.ip;}).catch(function(){});})();
         function openSurvey(){document.getElementById('surveyModal').style.display='block';document.body.style.overflow='hidden';currentStep=1;document.getElementById('propertyAddress').value='';addressValidated['propertyAddress']=false;showStep(1);}
         function closeSurvey(){document.getElementById('surveyModal').style.display='none';document.body.style.overflow='';}
         window.onclick=function(e){if(e.target==document.getElementById('surveyModal'))closeSurvey();}
@@ -377,6 +379,7 @@
             formData.email = email;
             formData.phone = phone;
             formData.source = 'Boyce Property Group - Divorce';
+            Object.keys(utmParams).forEach(function(k){formData[k]=utmParams[k];});
 
             const webhookURL = 'https://services.leadconnectorhq.com/hooks/ucrruoDfYGhhJrTlBTaT/webhook-trigger/1bf3d74f-f6df-4290-90e5-7aa6518de43f';
 

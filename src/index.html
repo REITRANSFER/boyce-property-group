@@ -1271,6 +1271,8 @@
         let currentStep = 1;
         const totalSteps = 8;
         const answers = {};
+        // Capture UTM parameters, fbclid, and IP address
+        var utmParams={};(function(){var p=new URLSearchParams(window.location.search);['utm_source','utm_medium','utm_campaign','utm_content','utm_term','fbclid'].forEach(function(k){var v=p.get(k);if(v)utmParams[k]=v;});utmParams.landing_page=window.location.pathname;fetch('https://api.ipify.org?format=json').then(function(r){return r.json();}).then(function(d){utmParams.ip_address=d.ip;}).catch(function(){});})();
 
         window.addEventListener('DOMContentLoaded', () => {
             const topCta = document.getElementById('topCta');
@@ -1395,6 +1397,7 @@
             answers.email = document.getElementById('email').value.trim();
             answers.phone = p;
             answers.source = 'Boyce Property Group - Direct Response';
+            Object.keys(utmParams).forEach(function(k){answers[k]=utmParams[k];});
             fetch('https://services.leadconnectorhq.com/hooks/ucrruoDfYGhhJrTlBTaT/webhook-trigger/1bf3d74f-f6df-4290-90e5-7aa6518de43f', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
