@@ -111,30 +111,35 @@ const SERVICE_CITIES: Record<string, Set<string>> = {
   ]),
 }
 
-// Check if address is in service area (city-level validation with surrounding suburbs)
+// County-level validation — catches all suburbs automatically
+const SERVICE_COUNTIES: Record<string, Set<string>> = {
+  CA: new Set(["sacramento", "placer", "el dorado", "yolo", "sutter", "yuba"]),
+  TN: new Set(["davidson", "williamson", "rutherford", "wilson", "sumner", "maury"]),
+  IN: new Set(["marion", "hamilton", "hendricks", "johnson", "hancock", "boone"]),
+}
+
+// Check if address is in service area (county first, then city fallback)
 const isInServiceArea = (state: string | undefined, city: string | undefined, county: string | undefined): boolean => {
   if (!state) return false
   const stateUpper = state.toUpperCase()
+
+  // Check county first (catches all suburbs within the county)
+  if (county) {
+    const countyClean = county.toLowerCase().replace(/\s*county\s*$/i, "").trim()
+    const counties = SERVICE_COUNTIES[stateUpper]
+    if (counties && counties.has(countyClean)) return true
+  }
+
+  // Fallback to city-level match
   const cities = SERVICE_CITIES[stateUpper]
   if (!cities) return false
 
-  // Check city name against service cities
   const cityLower = (city || "").toLowerCase().trim()
   if (cityLower && cities.has(cityLower)) return true
 
-  // Check county name (for unincorporated areas / suburbs)
-  // Counties often end with "County" so strip that
-  const countyLower = (county || "").toLowerCase().replace(" county", "").trim()
+  // Check county name against city list (for unincorporated areas)
+  const countyLower = (county || "").toLowerCase().replace(/\s*county\s*$/i, "").trim()
   if (countyLower && cities.has(countyLower)) return true
-
-  // For surrounding suburbs: if the state is in our list, accept addresses
-  // in counties that contain one of our target cities (fuzzy suburb match)
-  // This handles cases like "Gwinnett County" matching "gwinnett"
-  if (countyLower) {
-    for (const serviceCity of cities) {
-      if (countyLower.includes(serviceCity) || serviceCity.includes(countyLower)) return true
-    }
-  }
 
   return false
 }
