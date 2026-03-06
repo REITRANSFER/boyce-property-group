@@ -18,6 +18,7 @@ interface SurveyData {
   address: string
   propertyType: string
   isLegalOwner: string
+  listedOnMarket: string
   timeline: string
   condition: string
   reason: string
@@ -39,6 +40,12 @@ const LEGAL_OWNER_OPTIONS = [
   { id: "yes-owner", label: "Yes, I am the legal homeowner" },
   { id: "yes-family", label: "Yes, I am a family member with the legal right to sell" },
   { id: "no", label: "No, I am not" },
+]
+
+const LISTED_OPTIONS = [
+  { id: "not-listed", label: "No, it is not listed" },
+  { id: "listed-realtor", label: "Yes, listed with a realtor" },
+  { id: "listed-fsbo", label: "Yes, listed for sale by owner" },
 ]
 
 const TIMELINE_OPTIONS = [
@@ -211,6 +218,7 @@ export function SurveyCard() {
     address: "",
     propertyType: "",
     isLegalOwner: "",
+    listedOnMarket: "",
     timeline: "",
     condition: "",
     reason: "",
@@ -220,6 +228,7 @@ export function SurveyCard() {
   })
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isDisqualified, setIsDisqualified] = useState(false)
+  const [disqualifyReason, setDisqualifyReason] = useState("")
   const [addressVerified, setAddressVerified] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
@@ -232,10 +241,10 @@ export function SurveyCard() {
   const [showOutOfAreaPopup, setShowOutOfAreaPopup] = useState(false)
   const [selectedState, setSelectedState] = useState("")
 
-  const totalSteps = 7
+  const totalSteps = 8
 
   const handleNext = async () => {
-    if (step === 7) {
+    if (step === 8) {
       const errors: {[key: string]: string} = {}
 
       const nameCheck = validateName(surveyData.name)
@@ -302,12 +311,14 @@ export function SurveyCard() {
       case 3:
         return surveyData.isLegalOwner !== ""
       case 4:
-        return surveyData.timeline !== ""
+        return surveyData.listedOnMarket !== ""
       case 5:
-        return surveyData.condition !== ""
+        return surveyData.timeline !== ""
       case 6:
-        return surveyData.reason !== ""
+        return surveyData.condition !== ""
       case 7:
+        return surveyData.reason !== ""
+      case 8:
         return (
           surveyData.name.trim().length > 0 &&
           surveyData.email.trim().length > 0 &&
@@ -324,6 +335,16 @@ export function SurveyCard() {
     // Check for disqualification on property type
     if (field === "propertyType" && ["mobile-home", "land", "other"].includes(value)) {
       setTimeout(() => {
+        setDisqualifyReason("propertyType")
+        setIsDisqualified(true)
+      }, 300)
+      return
+    }
+
+    // Check for disqualification on listed on market
+    if (field === "listedOnMarket" && ["listed-realtor", "listed-fsbo"].includes(value)) {
+      setTimeout(() => {
+        setDisqualifyReason("listed")
         setIsDisqualified(true)
       }, 300)
       return
@@ -331,6 +352,7 @@ export function SurveyCard() {
 
     if (field === "isLegalOwner" && value === "no") {
       setTimeout(() => {
+        setDisqualifyReason("notOwner")
         setIsDisqualified(true)
       }, 300)
       return
@@ -377,6 +399,24 @@ export function SurveyCard() {
   )
 
   if (isDisqualified) {
+    const disqualifyMessages: Record<string, { title: string; message: string; detail: string }> = {
+      notOwner: {
+        title: "We're Unable to Assist",
+        message: "Unfortunately, we can only work with individuals who have the legal right to sell the property.",
+        detail: "If you believe you have legal authority to sell (such as power of attorney, executor of estate, or court-appointed representative), please contact us directly.",
+      },
+      listed: {
+        title: "We Can't Make an Offer Right Now",
+        message: "We're unable to make an offer on properties that are currently listed on the market.",
+        detail: "If your listing expires or you decide to take it off the market, we'd love to help. Feel free to reach out to us at that time.",
+      },
+      propertyType: {
+        title: "We're Unable to Assist",
+        message: "Unfortunately, we're not able to make an offer on this type of property at this time.",
+        detail: "We primarily purchase single-family homes, multi-family properties, and condos/townhouses. If you have a different property you'd like to sell, feel free to reach out.",
+      },
+    }
+    const msg = disqualifyMessages[disqualifyReason] || disqualifyMessages.notOwner
     return (
       <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
         <div className="flex flex-col items-center gap-5 text-center">
@@ -384,12 +424,12 @@ export function SurveyCard() {
             <XCircle className="h-7 w-7 text-red-500" />
           </div>
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">We're Unable to Assist</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">{msg.title}</h2>
             <p className="mt-2 text-gray-600">
-              Unfortunately, we can only work with individuals who have the legal right to sell the property.
+              {msg.message}
             </p>
             <p className="mt-4 text-sm text-gray-500">
-              If you believe you have legal authority to sell (such as power of attorney, executor of estate, or court-appointed representative), please contact us directly.
+              {msg.detail}
             </p>
           </div>
           <a
@@ -499,8 +539,23 @@ export function SurveyCard() {
           </div>
         )}
 
-        {/* Step 4: Timeline */}
+        {/* Step 4: Listed on Market */}
         {step === 4 && (
+          <div className="flex flex-col gap-4">
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-900">Is the property currently listed on the market?</h2>
+              <p className="mt-1 text-sm text-gray-500">Let us know if the property is currently for sale.</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {LISTED_OPTIONS.map((option) =>
+                renderOptionButton(option, surveyData.listedOnMarket, "listedOnMarket")
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Timeline */}
+        {step === 5 && (
           <div className="flex flex-col gap-4">
             <div>
               <h2 className="text-2xl font-semibold text-gray-900">How fast are you looking to sell?</h2>
@@ -514,8 +569,8 @@ export function SurveyCard() {
           </div>
         )}
 
-        {/* Step 5: Condition */}
-        {step === 5 && (
+        {/* Step 6: Condition */}
+        {step === 6 && (
           <div className="flex flex-col gap-4">
             <div>
               <h2 className="text-2xl font-semibold text-gray-900">What condition is the property in?</h2>
@@ -529,8 +584,8 @@ export function SurveyCard() {
           </div>
         )}
 
-        {/* Step 6: Reason */}
-        {step === 6 && (
+        {/* Step 7: Reason */}
+        {step === 7 && (
           <div className="flex flex-col gap-4">
             <div>
               <h2 className="text-2xl font-semibold text-gray-900">What's your reason for selling?</h2>
@@ -544,8 +599,8 @@ export function SurveyCard() {
           </div>
         )}
 
-        {/* Step 7: Contact Information */}
-        {step === 7 && (
+        {/* Step 8: Contact Information */}
+        {step === 8 && (
           <div className="flex flex-col gap-4">
             <div>
               <h2 className="text-2xl font-semibold text-gray-900">How can we reach you?</h2>
