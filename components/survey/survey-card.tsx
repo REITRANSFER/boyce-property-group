@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Home, ArrowRight, ArrowLeft, Check, XCircle, MapPin } from "lucide-react"
+import { Home, ArrowRight, ArrowLeft, ArrowDown, Check, XCircle, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { captureTrackingData, getIPAddress } from "@/lib/tracking"
 import { Input } from "@/components/ui/input"
@@ -393,7 +393,7 @@ export function SurveyCard() {
     <button
       key={option.id}
       onClick={() => handleOptionSelect(field, option.id)}
-      className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all ${
+      className={`w-full rounded-xl border px-4 py-3.5 text-left text-base font-medium transition-all ${
         selectedValue === option.id
           ? "border-[#2b5e8e] bg-[#2b5e8e]/10 text-gray-900"
           : "border-gray-200 bg-white text-gray-700 hover:border-[#2b5e8e]/50 hover:bg-gray-50"
@@ -425,7 +425,7 @@ export function SurveyCard() {
     return (
       <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
         <div className="flex flex-col items-center gap-5 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
             <XCircle className="h-7 w-7 text-red-500" />
           </div>
           <div>
@@ -452,7 +452,7 @@ export function SurveyCard() {
     return (
       <div className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
         <div className="flex flex-col items-center gap-5 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#22c55e]/10">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#22c55e]/10">
             <Check className="h-7 w-7 text-[#22c55e]" />
           </div>
           <div>
@@ -505,12 +505,23 @@ export function SurveyCard() {
               <h2 className="text-2xl font-semibold text-gray-900">What's your property address?</h2>
               <p className="mt-1 text-sm text-gray-500">Start typing and select your address from the dropdown.</p>
             </div>
+            <div className="flex justify-center -mb-2">
+              <ArrowDown className="h-6 w-6 text-[#2b5e8e] animate-bounce" />
+            </div>
             <AddressAutocomplete
               value={surveyData.address}
               onChange={(address) => { setSurveyData({ ...surveyData, address }); setAddressVerified(false) }}
               onSelect={handleAddressSelect}
               placeholder="Start typing your address..."
             />
+            <Button
+              onClick={handleNext}
+              disabled={!canProceed()}
+              className="w-full h-14 bg-[#2b5e8e] text-white text-lg font-semibold rounded-xl hover:bg-[#1a3d5f] disabled:opacity-40 transition-all shadow-md hover:shadow-lg"
+            >
+              Get My Cash Offer
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
         )}
 
@@ -620,7 +631,7 @@ export function SurveyCard() {
                     setSurveyData({ ...surveyData, name: e.target.value })
                     setValidationErrors({ ...validationErrors, name: "" })
                   }}
-                  className={`h-12 rounded-xl border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-[#2b5e8e] focus:ring-[#2b5e8e]/20 ${validationErrors.name ? "border-red-500" : ""}`}
+                  className={`h-14 rounded-xl border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-[#2b5e8e] focus:ring-[#2b5e8e]/20 ${validationErrors.name ? "border-red-500" : ""}`}
                 />
                 {validationErrors.name && <p className="mt-1 text-xs text-red-500">{validationErrors.name}</p>}
               </div>
@@ -633,7 +644,7 @@ export function SurveyCard() {
                     setSurveyData({ ...surveyData, email: e.target.value })
                     setValidationErrors({ ...validationErrors, email: "" })
                   }}
-                  className={`h-12 rounded-xl border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-[#2b5e8e] focus:ring-[#2b5e8e]/20 ${validationErrors.email ? "border-red-500" : ""}`}
+                  className={`h-14 rounded-xl border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-[#2b5e8e] focus:ring-[#2b5e8e]/20 ${validationErrors.email ? "border-red-500" : ""}`}
                 />
                 {validationErrors.email && <p className="mt-1 text-xs text-red-500">{validationErrors.email}</p>}
               </div>
@@ -647,7 +658,7 @@ export function SurveyCard() {
                     setValidationErrors({ ...validationErrors, phone: "" })
                   }}
                   maxLength={14}
-                  className={`h-12 rounded-xl border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-[#2b5e8e] focus:ring-[#2b5e8e]/20 ${validationErrors.phone ? "border-red-500" : ""}`}
+                  className={`h-14 rounded-xl border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-[#2b5e8e] focus:ring-[#2b5e8e]/20 ${validationErrors.phone ? "border-red-500" : ""}`}
                 />
                 {validationErrors.phone && <p className="mt-1 text-xs text-red-500">{validationErrors.phone}</p>}
               </div>
