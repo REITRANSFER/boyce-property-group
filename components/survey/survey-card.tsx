@@ -374,12 +374,6 @@ export function SurveyCard() {
     setSurveyData({ ...surveyData, address })
     setAddressVerified(true)
 
-    if (!isInServiceArea(details.state, details.city, details.county)) {
-      setSelectedState(details.city ? `${details.city}, ${details.state}` : (details.state || "Unknown"))
-      setShowOutOfAreaPopup(true)
-      return
-    }
-
     setTimeout(() => {
       setStep(2)
     }, 300)
