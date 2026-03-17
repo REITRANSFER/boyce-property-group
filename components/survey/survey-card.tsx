@@ -669,13 +669,13 @@ export function SurveyCard() {
           </div>
         )}
 
-        {/* Navigation buttons */}
+        {/* Navigation buttons — hidden on step 1 since the big CTA handles it */}
+        {step !== 1 && (
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
             onClick={handleBack}
-            disabled={step === 1}
-            className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-0"
+            className="text-gray-500 hover:text-gray-900 hover:bg-gray-100"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
@@ -698,6 +698,7 @@ export function SurveyCard() {
             )}
           </Button>
         </div>
+        )}
       </div>
 
       {/* Out of Service Area Popup */}
